@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab 9</title>
-
   <style>
     button {
       margin: 3px;
@@ -88,20 +87,136 @@
   </main>
 
   <script>
+    class InputError extends Error {
+      constructor(field, message) {
+        super(message);
+        this.name = 'InputError';
+        this.field = field;
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
       let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
+      let firstVal = document.querySelector('#first-num').value.trim();
+      let secondVal = document.querySelector('#second-num').value.trim();
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (firstVal === '' || secondVal === '') {
+          throw new InputError('emptyInput', 'Both inputs are required');
+        }
+        let a = Number(firstVal);
+        let b = Number(secondVal);
+        if (isNaN(a)) {
+          throw new InputError('first-num', 'First value is not a valid number');
+        }
+        if (isNaN(b)) {
+          throw new InputError('second-num', 'Second value is not a valid number');
+        }
+        if (operator === '/' && b === 0) {
+          throw new InputError('division', 'Cannot divide by zero');
+        }
+        let result = eval(`${a} ${operator} ${b}`);
+        output.innerHTML = result;
+      } catch (err) {
+        if (err instanceof InputError) {
+          console.error(`[InputError] Field: ${err.field}, Message: ${err.message}`);
+          output.innerHTML = err.message;
+        } else {
+          console.error('[Unexpected Error]', err);
+          output.innerHTML = 'An unexpected error occurred';
+        }
+      } finally {
+        console.log('Calculation attempt finished');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    const countLabel = 'demoCount';
+    const timerLabel = 'demoTimer';
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    errorBtns.forEach(btn => {
+      const text = btn.innerText.trim();
+      btn.addEventListener('click', () => {
+        switch (text) {
+          case 'Console Log':
+            const demoObj = { id: 123, name: 'Alice', roles: ['admin', 'user'] };
+            console.log('[Console Log] Here is a demo object:', demoObj);
+            break;
+          case 'Console Error':
+            console.error('[Console Error] This is a console.error example.');
+            break;
+          case 'Console Count':
+            console.count(countLabel);
+            break;
+          case 'Console Warn':
+            console.warn('[Console Warn] This is a warning example.');
+            break;
+          case 'Console Assert':
+            console.assert(2 + 2 === 5, '[Console Assert] 2 + 2 did not equal 5!');
+            break;
+          case 'Console Clear':
+            console.clear();
+            break;
+          case 'Console Dir':
+            const outputEl = document.querySelector('output');
+            console.dir(outputEl);
+            break;
+          case 'Console dirxml':
+            const mainEl = document.querySelector('main');
+            console.dirxml(mainEl);
+            break;
+          case 'Console Group Start':
+            console.group('Group Demo');
+            console.log('Inside group: Step 1');
+            console.log('Inside group: Step 2');
+            break;
+          case 'Console Group End':
+            console.groupEnd();
+            break;
+          case 'Console Table':
+            const tableData = [
+              { id: 1, item: 'Apple', price: 0.99 },
+              { id: 2, item: 'Banana', price: 1.25 },
+              { id: 3, item: 'Cherry', price: 2.5 }
+            ];
+            console.table(tableData);
+            break;
+          case 'Start Timer':
+            console.time(timerLabel);
+            console.log('[Start Timer] Timer started');
+            break;
+          case 'End Timer':
+            console.timeEnd(timerLabel);
+            break;
+          case 'Console Trace':
+            function firstCall() { secondCall(); }
+            function secondCall() { thirdCall(); }
+            function thirdCall() {
+              console.trace('[Console Trace] Call stack trace');
+            }
+            firstCall();
+            break;
+          case 'Trigger a Global Error':
+            // This call does not exist, causing a ReferenceError
+            missingFunctionThatDoesNotExist();
+            break;
+          default:
+            console.log('[Unknown Button] No handler for:', text);
+        }
+      });
+    });
+
+    // Global error handler: catches errors like ReferenceError from "Trigger a Global Error" button
+    window.onerror = function (message, source, lineno, colno, errorObj) {
+      console.log('[Global Error Caught] ', message);
+      return false; // allow default console.error as well
+    };
+
+    window.addEventListener('unhandledrejection', event => {
+      console.log('[Unhandled Promise Rejection] ', event.reason);
+    });
   </script>
 </body>
 
