@@ -46,6 +46,13 @@
       width: 122px;
     }
   </style>
+
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({
+      token: "c571b50d459647d6a73c3399308e1834"
+    });
+  </script>
 </head>
 
 <body>
@@ -199,7 +206,6 @@
             firstCall();
             break;
           case 'Trigger a Global Error':
-            // This call does not exist, causing a ReferenceError
             missingFunctionThatDoesNotExist();
             break;
           default:
@@ -208,10 +214,9 @@
       });
     });
 
-    // Global error handler: catches errors like ReferenceError from "Trigger a Global Error" button
     window.onerror = function (message, source, lineno, colno, errorObj) {
       console.log('[Global Error Caught] ', message);
-      return false; // allow default console.error as well
+      return false;
     };
 
     window.addEventListener('unhandledrejection', event => {
